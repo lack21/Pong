@@ -1,0 +1,251 @@
+# lear
+# Pong
+
+import pygame
+import random as rd
+
+if __name__ == "__main__":
+
+    pygame.init()
+
+    # Screen
+    WIDTH = 1200
+    HEIGHT = 800
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+    # Background
+    background_1 = pygame.image.load("pong_bg_1.jpg")
+    background_2 = pygame.image.load("pong_bg_2.jpg")
+    back = True
+
+    # Title
+    pygame.display.set_caption("Pong")
+
+
+    # Paddles and Ball
+    class Parts:
+        def __init__(self, paddle_1, paddle_1_X, paddle_1_Y, paddle_2, paddle_2_X, paddle_2_Y, ball, ball_X, ball_Y):
+            self.paddle_1 = paddle_1
+            self.paddle_1_X = paddle_1_X
+            self.paddle_1_Y = paddle_1_Y
+
+            self.paddle_2 = paddle_2
+            self.paddle_2_X = paddle_2_X
+            self.paddle_2_Y = paddle_2_Y
+
+            self.ball = ball
+            self.ball_X = ball_X
+            self.ball_Y = ball_Y
+
+        def get_paddle_1(self):
+            screen.blit(self.paddle_1, (self.paddle_1_X, self.paddle_1_Y))
+
+        def get_paddle_2(self):
+            screen.blit(self.paddle_2, (self.paddle_2_X, self.paddle_2_Y))
+
+        def get_ball(self):
+            screen.blit(self.ball, (self.ball_X, self.ball_Y))
+
+
+    Paddle_1 = pygame.image.load("paddle_1.png")
+    Paddle_1_X = 50
+    Paddle_1_Y = 310
+    Change_1 = 0
+
+    Paddle_2 = pygame.image.load("paddle_2.png")
+    Paddle_2_X = 1120
+    Paddle_2_Y = 310
+    Change_2 = 0
+
+    ball = pygame.image.load("ball_1.png")
+    ball_X = 584
+    ball_Y = 384
+    Ball_X_Change = 0
+    Ball_Y_Change = 0
+
+    ball_random = rd.randint(0, 1)
+    ball_random_2 = rd.randint(0, 1)
+    speed = [1, -1]
+    Ball_X_Change = speed[ball_random]
+    Ball_Y_Change = speed[ball_random_2]
+
+
+    Bl = True
+
+    Part = Parts(Paddle_1, Paddle_1_X, Paddle_1_Y, Paddle_2, Paddle_2_X, Paddle_2_Y, ball, ball_X, ball_Y)
+
+
+    # Special
+
+    text = pygame.font.Font("freesansbold.ttf", 44)
+
+    class Special:
+        def __init__(self, score_1, score_2):
+            self.score_1 = score_1
+            self.score_2 = score_2
+
+        def get_score_1(self):
+            score_text = text.render(f"{self.score_1}", True, (80, 30, 190))
+            screen.blit(score_text, (200, 30))
+
+        def get_score_2(self):
+            score_text = text.render(f"{self.score_2}", True, (30, 80, 190))
+            screen.blit(score_text, (1000, 30))
+
+    score_1 = 0
+    score_2 = 0
+
+    Spec = Special(score_1, score_2)
+
+    # Sound
+
+    ball_hitted = pygame.mixer.Sound("spaceship_hitted.wav")
+
+    running = True
+    while running:
+        if back:
+            screen.blit(background_1, (0, 0))
+
+        else:
+            screen.blit(background_2, (0, 0))
+
+        
+        if Bl:
+            Part.ball = pygame.image.load("ball_1.png")
+
+        else:
+            Part.ball = pygame.image.load("ball_2.png")
+
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    back = not(back)
+
+                if event.key == pygame.K_o:
+                    Bl = not(Bl)
+
+                if event.key == pygame.K_w and Part.paddle_1_Y > 0:
+                    Change_1 = -2
+
+                if event.key == pygame.K_s and Part.paddle_1_Y < 652:
+                    Change_1 = 2
+
+                if event.key == pygame.K_UP and Part.paddle_2_Y > 0:
+                    Change_2 = -2
+
+                if event.key == pygame.K_DOWN and Part.paddle_2_Y < 652:
+                    Change_2 = 2
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    Change_1 = 0
+
+                if event.key == pygame.K_s:
+                    Change_1 = 0
+
+                if event.key == pygame.K_UP:
+                    Change_2 = 0
+
+                if event.key == pygame.K_DOWN:
+                    Change_2 = 0
+
+
+        Part.paddle_1_Y += Change_1
+        Part.paddle_2_Y += Change_2
+
+        if Part.paddle_1_Y <= 0:
+            Change_1 = 0
+
+        if Part.paddle_1_Y >= 652:
+            Change_1 = 0
+
+        if Part.paddle_2_Y <= 0:
+            Change_2 = 0
+
+        if Part.paddle_2_Y >= 652:
+            Change_2 = 0
+
+
+        Part.ball_X += Ball_X_Change
+        Part.ball_Y += Ball_Y_Change
+
+        if Part.ball_Y > Part.paddle_1_Y and Part.ball_Y < Part.paddle_1_Y + 148 and Part.ball_X < Part.paddle_1_X + 30 and Part.ball_X > Part.paddle_1_X + 25:
+            Ball_X_Change *= -1
+            Ball_Y_Change *= 1
+
+            ball_hitted.play()
+
+            if Ball_Y_Change > 0:
+                Ball_Y_Change += 0.2
+
+            else:
+                Ball_Y_Change -= 0.2
+
+
+            if Ball_X_Change > 0:
+                Ball_X_Change += 0.1
+
+            else:
+                Ball_X_Change -= 0.1
+
+
+        if Part.ball_Y > Part.paddle_2_Y and Part.ball_Y < Part.paddle_2_Y + 148 and Part.ball_X > Part.paddle_2_X - 30 and Part.ball_X > Part.paddle_1_X - 25:
+            Ball_X_Change *= -1
+            Ball_Y_Change *= 1
+
+            ball_hitted.play()
+
+            if Ball_Y_Change > 0:
+                Ball_Y_Change += 0.2
+
+            else:
+                Ball_Y_Change -= 0.2
+
+            
+            if Ball_X_Change > 0:
+                Ball_X_Change += 0.1
+
+            else:
+                Ball_X_Change -= 0.1
+
+        if Part.ball_Y >= 767:
+            Ball_Y_Change *= -1
+            ball_hitted.play()
+
+        if Part.ball_Y <= 0:
+            Ball_Y_Change *= -1
+            ball_hitted.play()
+
+        if Part.ball_X <= 20:
+            Part.ball_X = 584
+            Part.ball_Y = 384
+            Spec.score_2 += 1
+            ball_random = rd.randint(0, 1)
+            ball_random_2 = rd.randint(0, 1)
+            Ball_X_Change = speed[ball_random]
+            Ball_Y_Change = speed[ball_random_2]
+
+        if Part.ball_X >= 1180:
+            Part.ball_X = 584
+            Part.ball_Y = 384
+            Spec.score_1 += 1
+            ball_random = rd.randint(0, 1)
+            ball_random_2 = rd.randint(0, 1)
+            Ball_X_Change = speed[ball_random]
+            Ball_Y_Change = speed[ball_random_2]
+
+
+        Spec.get_score_1()
+        Spec.get_score_2()
+
+        Part.get_paddle_1()
+        Part.get_paddle_2()
+        Part.get_ball()
+
+        
+        pygame.display.update()
